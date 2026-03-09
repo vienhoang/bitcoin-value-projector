@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Value Projector</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="favicon.ico">
+    <meta name="theme-color" content="#f7931a">
+</head>
+<body>
+    <!-- Fixed Navigation Menu -->
+    <nav class="nav-menu">
+        <div class="nav-container">
+            <a href="#top" class="nav-logo">
+                ₿ Bitcoin Value Projector
+            </a>
+            <ul class="nav-links">
+                <li><a href="#calculator">Calculator</a></li>
+                <li><a href="#resources">Resources</a></li>
+                <li><a href="#share">Share</a></li>
+                <li><a href="#donate">Donate</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="bg-pattern"></div>
+    
+    <div class="container">
+        <header id="top">
+            <h1>₿ Value Projector</h1>
+            <p class="subtitle">Bitcoin Value Calculator & Hodl Simulator</p>
+        </header>
+
+        <div class="privacy-notice">
+            <strong>🔒 100% Private</strong> - All data stays in your browser. Nothing is sent to any server.
+        </div>
+
+        <!-- CALCULATOR SECTION -->
+        <section id="calculator">
+            <div class="grid">
+                <div class="panel">
+                    <h3 class="panel-title">Your Bitcoin Stack</h3>
+                    
+                    <div class="input-group">
+                        <label for="btcAmount">Bitcoin Amount (BTC)</label>
+                        <input type="number" id="btcAmount" step="0.00000001" placeholder="0.1" value="0.1">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="avgPrice">Average Purchase Price (USD)</label>
+                        <input type="number" id="avgPrice" step="100" placeholder="30000" value="30000">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="currentPrice">Current Bitcoin Price (USD)</label>
+                        <input type="number" id="currentPrice" step="100" placeholder="95000" value="95000">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="totalInvested">Total Amount Invested (USD)</label>
+                        <input type="number" id="totalInvested" step="100" placeholder="3000" readonly>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3 class="panel-title">Projection Settings</h3>
+
+                    <div class="scenario-buttons">
+                        <button class="scenario-btn" data-cagr="15">Conservative<br>15% CAGR</button>
+                        <button class="scenario-btn active" data-cagr="25">Moderate<br>25% CAGR</button>
+                        <button class="scenario-btn" data-cagr="40">Bullish<br>40% CAGR</button>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="customCAGR">Custom CAGR (%) per year</label>
+                        <input type="number" id="customCAGR" step="1" placeholder="25" value="25">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="targetYear">Target Year for Projection</label>
+                        <select id="targetYear">
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                            <option value="2029">2029</option>
+                            <option value="2030" selected>2030</option>
+                            <option value="2035">2035</option>
+                            <option value="2040">2040</option>
+                            <option value="2045">2045</option>
+                            <option value="2050">2050</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="dcaMonthly">Monthly DCA Purchase (USD, optional)</label>
+                        <input type="number" id="dcaMonthly" step="50" placeholder="0" value="0">
+                    </div>
+
+                    <button class="btn" onclick="calculate()">Calculate Projection</button>
+                </div>
+            </div>
+
+            <div id="results">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Current Value</div>
+                        <div class="stat-value" id="currentValue">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Profit/Loss</div>
+                        <div class="stat-value" id="profitLoss">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">ROI So Far</div>
+                        <div class="stat-value" id="currentROI">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Projection <span id="projYear">2030</span></div>
+                        <div class="stat-value green" id="projectedValue">$0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Stack Multiple</div>
+                        <div class="stat-value green" id="stackMultiple">0x</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Breakeven Year</div>
+                        <div class="stat-value" id="breakevenYear">—</div>
+                    </div>
+                </div>
+
+                <div class="panel full-width">
+                    <h3 class="panel-title">Value Projection Over Time</h3>
+                    <div class="chart-container">
+                        <canvas id="projectionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="panel full-width">
+                    <h3 class="panel-title">Comparison with Alternative Investments</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 13px;">
+                        Same investment in other assets (based on historical averages)
+                    </p>
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4>🟢 S&P 500</h4>
+                            <div class="comparison-value" id="sp500Value">$0</div>
+                            <div class="comparison-note">~10% annual return</div>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>🟡 Gold</h4>
+                            <div class="comparison-value" id="goldValue">$0</div>
+                            <div class="comparison-note">~7% annual return</div>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>🏠 Real Estate</h4>
+                            <div class="comparison-value" id="realEstateValue">$0</div>
+                            <div class="comparison-note">~8% annual return</div>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>💵 Cash</h4>
+                            <div class="comparison-value" id="cashValue">$0</div>
+                            <div class="comparison-note">-3% (inflation)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel full-width">
+                    <h3 class="panel-title">Timeline & Milestones</h3>
+                    <div class="timeline" id="timeline"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESOURCES SECTION -->
+        <section id="resources">
+            <div class="section-header">
+                <h2 class="section-title">Bitcoin Resources</h2>
+                <p class="section-description">
+                    Essential tools, wallets, and educational resources to help you on your Bitcoin journey
+                </p>
+            </div>
+
+            <div class="resource-grid">
+                <div class="resource-card">
+                    <h4>📚 Learn About Bitcoin</h4>
+                    <p>
+                        <strong>Mastering Bitcoin</strong> by <a href="https://aantonop.com/product-category/books/" target="_blank">Andreas Antonopoulos</a><br>
+                        <strong>The Bitcoin Standard</strong> by <a href="https://saifedean.com/books" target="_blank">Saifedean Ammous</a><br>
+                        <strong>The Fiat Standard</strong> by <a href="https://saifedean.com/books" target="_blank">Saifedean Ammous</a><br>
+                        <strong>Digital Gold</strong> by <a href="https://www.nathanielpopper.com/" target="_blank">Nathaniel Popper</a><br>
+                        <strong>The Age of Cryptocurrency</strong> by <a href="https://www.michaeljcasey.com/author" target="_blank">Paul Vigna & Michael Casey</a><br>
+                        <strong>The Bullish Case for Bitcoin</strong> by <a href="https://www.bullishcaseforbitcoin.com/" target="_blank">Vijay Boyapati</a><br>
+                        <strong>Layered Money</strong> by <a href="https://thebitcoinlayer.com/" target="_blank">Nik Bhatia</a><br>
+                        <strong>The Price of Tomorrow</strong> by <a href="https://jeffreybooth.com/books" target="_blank">Jeff Booth</a><br>
+                    </p>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🔐 Hardware Wallets</h4>
+                    <p>
+                        <a href="https://shop.ledger.com/pages/referral-program?referral_code=6NM68XS3P893V" target="_blank">Ledger</a> - Popular hardware wallet<br>
+                        <a href="http://trezorio.refr.cc/default/u/vienhoang" target="_blank">Trezor</a> - Open-source hardware wallet<br>
+                        <a href="https://blockstream.com" target="_blank">Blockstream Jade</a> - Open-source hardware wallet<br>
+                        <a href="https://coldcard.com" target="_blank">Coldcard</a> - Bitcoin-only cold storage<br>
+                        <a href="https://shiftcrypto.ch" target="_blank">BitBox</a> - Swiss-made security
+                    </p>
+                </div>
+
+                <div class="resource-card">
+                    <h4>💻 Software Wallets</h4>
+                    <p>
+                        <a href="https://muun.com" target="_blank">Muun Wallet</a> - Mobile wallet<br>
+                        <a href="https://phoenix.acinq.co" target="_blank">Phoenix Wallet</a> - Mobile wallet<br>
+                        <a href="https://bitcoin.org/en/wallets/desktop/windows/bitcoincore/?step=5&platform=windows" target="_blank">Bitcoin Core Wallet</a> - Desktop wallet<br>
+                        <a href="https://wasabiwallet.io" target="_blank">Wasabi Wallet</a> - Desktop wallet<br>
+                        <a href="https://sparrowwallet.com" target="_blank">Sparrow Wallet</a> - Desktop wallet<br>
+                        <a href="https://bluewallet.io" target="_blank">BlueWallet</a> - Mobile wallet<br>
+                        <a href="https://electrum.org" target="_blank">Electrum</a> - Lightweight wallet
+                    </p>
+                </div>
+
+                <div class="resource-card">
+                    <h4>📊 Price & Data</h4>
+                    <p>
+                        <a href="https://mempool.space" target="_blank">Mempool.space</a> - Block explorer<br>
+                        <a href="https://coinmarketcap.com" target="_blank">CoinMarketCap</a> - Price tracking<br>
+                        <a href="https://www.coingecko.com" target="_blank">Coingecko</a> - Price tracking<br>
+                        <a href="https://www.coindesk.com" target="_blank">CoinDesk</a> - Bitcoin Price Index<br>
+                        <a href="https://bitcointreasuries.net" target="_blank">Bitcoin Treasuries</a> - Corporate holdings
+                        <a href="https://www.blockchain.com/explorer" target="_blank">Blockchain.com</a> - Blockchain explorer
+
+                    </p>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🎓 Education Platforms</h4>
+                    <p>
+                        <a href="https://bitcoin.org/en/getting-started" target="_blank">Bitcoin.org Guide</a><br>
+                        <a href="https://www.youtube.com/@thejackmallersshow" target="_blank">The Jack Mallers Show</a><br>
+                        <a href="https://www.lopp.net/bitcoin-information.html" target="_blank">Jameson Lopp's Resources</a><br>
+                        <a href="https://www.youtube.com/@aantonop" target="_blank">Andreas Antonopoulos's YouTube</a>
+                    </p>
+                </div>
+
+                <div class="resource-card">
+                    <h4>🔍 Privacy Tools</h4>
+                    <p>
+                        <a href="https://www.torproject.org" target="_blank">Tor Browser</a> - Anonymous browsing<br>
+                        <a href="https://www.whonix.org" target="_blank">Whonix</a> - Privacy-focused OS for anonymous computing<br>
+                        <a href="https://tails.boum.org" target="_blank">Tails</a> - Live OS designed for privacy and anonymity<br>
+                        <a href="https://www.mullvad.net" target="_blank">Mullvad VPN</a> - Privacy-first VPN without logs<br>
+                        <a href="https://protonvpn.com" target="_blank">ProtonVPN</a> - Encrypted VPN with no-logs policy<br>
+                        <a href="https://www.expressvpn.com" target="_blank">ExpressVPN</a> - Fast and secure VPN service<br>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SHARE SECTION -->
+        <section id="share">
+            <div class="section-header">
+                <h2 class="section-title">Share This Tool</h2>
+                <p class="section-description">
+                    Help others discover this bitcoin projection calculator. Share it with friends and family!
+                </p>
+            </div>
+
+            <div class="share-container">
+                <div class="share-box">
+                    <h3 style="color: var(--bitcoin-orange); margin-bottom: 20px; font-size: 20px;">Copy Link</h3>
+                    <div class="url-display" id="siteUrl">https://github.com/vienhoang/bitcoin-value-projector</div>
+                    <button class="copy-btn" onclick="copyUrl(event)">📋 Copy URL</button>
+                    
+                </div>
+            </div>
+        </section>
+
+        <!-- DONATE SECTION -->
+        <section id="donate">
+            <div class="section-header">
+                <h2 class="section-title">Support This Project</h2>
+                <p class="section-description">
+                    If you find this tool useful, consider supporting its development with some bitcoin.
+                </p>
+            </div>
+
+            <div class="donate-container">
+                <div class="donate-box">
+                    <h3 style="color: var(--bitcoin-orange); margin-bottom: 15px; font-size: 20px;">₿ Bitcoin Donations</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">
+                        Send bitcoin to the address below.
+                    </p>
+
+                    <div class="btc-address" id="btcAddress">
+                        bc1qg5et6urjfhqv38a3hdltzrmu2u7hhwmjw0mc0r
+                    </div>
+
+                    <button class="copy-btn" onclick="copyBtcAddress(event)">📋 Copy Bitcoin Address</button>
+
+                    <div class="donation-note" style="margin-top: 30px; opacity: 0.7;">
+                        All donations help maintain and improve this free tool. Thank you for your support! 🧡
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ SECTION -->
+        <section id="faq">
+            <div class="section-header">
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <p class="section-description">
+                    Common questions about Bitcoin investing and using this calculator
+                </p>
+            </div>
+
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <div class="faq-question">What is CAGR?</div>
+                    <div class="faq-answer">
+                        CAGR stands for Compound Annual Growth Rate. It represents the mean annual growth rate of an investment over a specified time period longer than one year. It's one of the most accurate ways to calculate returns for anything that can rise or fall in value over time.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">What is DCA (Dollar-Cost Averaging)?</div>
+                    <div class="faq-answer">
+                        DCA is an investment strategy where you invest a fixed amount of money at regular intervals (e.g., monthly), regardless of the asset's price. This approach helps reduce the impact of volatility and removes the pressure of trying to "time the market." Many Bitcoiners use DCA to build their stack over time.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Is this calculator accurate?</div>
+                    <div class="faq-answer">
+                        This calculator provides mathematical projections based on the CAGR you input. However, Bitcoin's price is highly volatile and past performance does not guarantee future results. Use these projections as a planning tool, not as financial advice. Always do your own research and never invest more than you can afford to lose.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Is my data private?</div>
+                    <div class="faq-answer">
+                        Yes! This calculator runs entirely in your browser. No data is sent to any server, stored in any database, or shared with anyone. Everything you enter stays on your device. You can even use this calculator offline after the initial page load.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">What's the difference between the scenarios?</div>
+                    <div class="faq-answer">
+                        Conservative (15% CAGR) reflects slower, steadier growth. Moderate (25% CAGR) is closer to Bitcoin's historical average over certain periods. Bullish (40% CAGR) represents more aggressive growth scenarios. You can also input your own custom CAGR based on your personal outlook.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Should I invest in Bitcoin?</div>
+                    <div class="faq-answer">
+                        This tool is for educational and planning purposes only, not financial advice. Whether you should invest in Bitcoin depends on your personal financial situation, risk tolerance, and investment goals. Consider consulting with a qualified financial advisor before making any investment decisions.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">Why does Bitcoin only have 21 million coins?</div>
+                    <div class="faq-answer">
+                        Bitcoin's 21 million coin limit is hardcoded into its protocol by its creator, Satoshi Nakamoto. This fixed supply makes Bitcoin scarce, similar to gold. Unlike fiat currencies that can be printed infinitely, Bitcoin's scarcity is guaranteed by mathematics and consensus, making it resistant to inflation.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">What is "not your keys, not your coins"?</div>
+                    <div class="faq-answer">
+                        This is a core principle in Bitcoin: if you don't control the private keys to your Bitcoin, you don't truly own it. When Bitcoin is held on an exchange, the exchange controls the keys. For true ownership and security, you should withdraw your Bitcoin to a wallet where you control the private keys (preferably a hardware wallet).
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Bitcoin Value Projector - No data is saved or sent anywhere</p>
+            <p>© 2026 <a href="https://github.com/vienhoang"target="_blank">Vien H.</a> All rights reserved.</p>
+            <p style="margin-top: 10px; opacity: 0.5;">Note: These are only projections based on mathematical models. Not financial advice.</p>
+        </footer>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTop" onclick="scrollToTop()" aria-label="Scroll to top">
+        &#8679;
+    </button>
+
+    <script>
+        let projectionChart = null;
+
+        // Scroll to top button functionality
+        const scrollToTopBtn = document.getElementById('scrollToTop');
+
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                scrollToTopBtn.classList.add('visible');
+            } else {
+                scrollToTopBtn.classList.remove('visible');
+            }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Share and Copy functions
+        function copyUrl(event) {
+            const urlText = document.getElementById('siteUrl').textContent;
+            const btn = event.target;
+            
+            navigator.clipboard.writeText(urlText).then(function() {
+                btn.textContent = '✓ URL Copied!';
+                btn.classList.add('success');
+                setTimeout(function() {
+                    btn.textContent = '📋 Copy URL';
+                    btn.classList.remove('success');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Failed to copy URL:', err);
+            });
+        }
+
+        function copyBtcAddress(event) {
+            const btcText = document.getElementById('btcAddress').textContent.trim();
+            const btn = event.target;
+            
+            navigator.clipboard.writeText(btcText).then(function() {
+                btn.textContent = '✓ Bitcoin Address Copied!';
+                btn.classList.add('success');
+                setTimeout(function() {
+                    btn.textContent = '📋 Copy Bitcoin Address';
+                    btn.classList.remove('success');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Failed to copy address:', err);
+            });
+        }
+
+        // Auto-calculate total invested
+        document.getElementById('btcAmount').addEventListener('input', updateTotalInvested);
+        document.getElementById('avgPrice').addEventListener('input', updateTotalInvested);
+
+        function updateTotalInvested() {
+            const btc = parseFloat(document.getElementById('btcAmount').value) || 0;
+            const avgPrice = parseFloat(document.getElementById('avgPrice').value) || 0;
+            document.getElementById('totalInvested').value = (btc * avgPrice).toFixed(2);
+        }
+
+        // Scenario buttons
+        document.querySelectorAll('.scenario-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('customCAGR').value = this.dataset.cagr;
+            });
+        });
+
+        // Initial calculation
+        updateTotalInvested();
+
+        function formatCurrency(value) {
+            return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 0 });
+        }
+
+        function calculate() {
+            // Get inputs
+            const btcAmount = parseFloat(document.getElementById('btcAmount').value) || 0;
+            const avgPrice = parseFloat(document.getElementById('avgPrice').value) || 0;
+            const currentPrice = parseFloat(document.getElementById('currentPrice').value) || 0;
+            const totalInvested = parseFloat(document.getElementById('totalInvested').value) || 0;
+            const cagr = parseFloat(document.getElementById('customCAGR').value) || 0;
+            const targetYear = parseInt(document.getElementById('targetYear').value);
+            const dcaMonthly = parseFloat(document.getElementById('dcaMonthly').value) || 0;
+
+            if (btcAmount <= 0 || currentPrice <= 0) {
+                alert('Please fill in valid values ​​for bitcoin quantity and current price.');
+                return;
+            }
+
+            const currentYear = 2026;
+            const yearsToTarget = targetYear - currentYear;
+
+            // Current stats
+            const currentValue = btcAmount * currentPrice;
+            const profitLoss = currentValue - totalInvested;
+            const currentROI = ((currentValue / totalInvested - 1) * 100);
+
+            // Calculate projections with DCA
+            const monthsToTarget = yearsToTarget * 12;
+            let projectedBTC = btcAmount;
+            let additionalInvestment = 0;
+
+            // Simplified DCA calculation (assumes buying at average projected prices)
+            if (dcaMonthly > 0) {
+                // Average BTC price over the period (geometric mean approximation)
+                const avgFuturePrice = currentPrice * Math.pow(1 + cagr/100, yearsToTarget / 2);
+                const btcPerMonth = dcaMonthly / avgFuturePrice;
+                projectedBTC += btcPerMonth * monthsToTarget;
+                additionalInvestment = dcaMonthly * monthsToTarget;
+            }
+
+            const projectedPrice = currentPrice * Math.pow(1 + cagr/100, yearsToTarget);
+            const projectedValue = projectedBTC * projectedPrice;
+            const stackMultiple = projectedValue / (totalInvested + additionalInvestment);
+
+            // Calculate breakeven year
+            let breakevenYear = '—';
+            if (currentValue < totalInvested) {
+                for (let year = currentYear; year <= targetYear; year++) {
+                    const yearsDiff = year - currentYear;
+                    const valueAtYear = btcAmount * currentPrice * Math.pow(1 + cagr/100, yearsDiff);
+                    if (valueAtYear >= totalInvested) {
+                        breakevenYear = year;
+                        break;
+                    }
+                }
+            } else {
+                breakevenYear = 'Achieved';
+            }
+
+            // Update stats
+            document.getElementById('currentValue').textContent = formatCurrency(currentValue);
+            document.getElementById('profitLoss').textContent = formatCurrency(profitLoss);
+            document.getElementById('profitLoss').className = 'stat-value ' + (profitLoss >= 0 ? 'green' : 'red');
+            document.getElementById('currentROI').textContent = currentROI.toFixed(1) + '%';
+            document.getElementById('currentROI').className = 'stat-value ' + (currentROI >= 0 ? 'green' : 'red');
+            document.getElementById('projYear').textContent = targetYear;
+            document.getElementById('projectedValue').textContent = formatCurrency(projectedValue);
+            document.getElementById('stackMultiple').textContent = stackMultiple.toFixed(1) + 'x';
+            document.getElementById('breakevenYear').textContent = breakevenYear;
+
+            // Alternative investments comparison
+            const sp500Value = totalInvested * Math.pow(1.10, yearsToTarget);
+            const goldValue = totalInvested * Math.pow(1.07, yearsToTarget);
+            const realEstateValue = totalInvested * Math.pow(1.08, yearsToTarget);
+            const cashValue = totalInvested * Math.pow(0.97, yearsToTarget);
+
+            document.getElementById('sp500Value').textContent = formatCurrency(sp500Value);
+            document.getElementById('goldValue').textContent = formatCurrency(goldValue);
+            document.getElementById('realEstateValue').textContent = formatCurrency(realEstateValue);
+            document.getElementById('cashValue').textContent = formatCurrency(cashValue);
+
+            // Generate timeline
+            generateTimeline(currentYear, targetYear, btcAmount, currentPrice, cagr, totalInvested, dcaMonthly);
+
+            // Create chart
+            createChart(currentYear, targetYear, btcAmount, currentPrice, cagr, totalInvested, dcaMonthly);
+
+            // Show results
+            document.getElementById('results').classList.add('visible', 'fade-in');
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function generateTimeline(startYear, endYear, btc, currentPrice, cagr, invested, dcaMonthly) {
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = '';
+
+            const step = Math.ceil((endYear - startYear) / 10);
+            
+            for (let year = startYear; year <= endYear; year += step) {
+                const yearsDiff = year - startYear;
+                
+                // Calculate BTC with DCA
+                let btcAtYear = btc;
+                if (dcaMonthly > 0 && yearsDiff > 0) {
+                    const avgPriceToYear = currentPrice * Math.pow(1 + cagr/100, yearsDiff / 2);
+                    const monthsToYear = yearsDiff * 12;
+                    btcAtYear += (dcaMonthly / avgPriceToYear) * monthsToYear;
+                }
+                
+                const priceAtYear = currentPrice * Math.pow(1 + cagr/100, yearsDiff);
+                const valueAtYear = btcAtYear * priceAtYear;
+                const additionalInv = dcaMonthly * yearsDiff * 12;
+                const multiple = valueAtYear / (invested + additionalInv);
+
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                item.innerHTML = `
+                    <div class="timeline-year">${year}</div>
+                    <div class="timeline-value">
+                        ${formatCurrency(valueAtYear)}
+                        <span style="color: var(--text-secondary); font-size: 14px; margin-left: 10px;">
+                            @ ${formatCurrency(priceAtYear)}/BTC
+                        </span>
+                    </div>
+                    <div class="timeline-multiple">${multiple.toFixed(1)}x</div>
+                `;
+                timeline.appendChild(item);
+            }
+        }
+
+        function createChart(startYear, endYear, btc, currentPrice, cagr, invested, dcaMonthly) {
+            const years = [];
+            const values = [];
+            const investmentLine = [];
+
+            for (let year = startYear; year <= endYear; year++) {
+                years.push(year);
+                const yearsDiff = year - startYear;
+                
+                // Calculate BTC with DCA
+                let btcAtYear = btc;
+                if (dcaMonthly > 0 && yearsDiff > 0) {
+                    const avgPriceToYear = currentPrice * Math.pow(1 + cagr/100, yearsDiff / 2);
+                    const monthsToYear = yearsDiff * 12;
+                    btcAtYear += (dcaMonthly / avgPriceToYear) * monthsToYear;
+                }
+                
+                const priceAtYear = currentPrice * Math.pow(1 + cagr/100, yearsDiff);
+                values.push(btcAtYear * priceAtYear);
+                investmentLine.push(invested + (dcaMonthly * yearsDiff * 12));
+            }
+
+            if (projectionChart) {
+                projectionChart.destroy();
+            }
+
+            const ctx = document.getElementById('projectionChart').getContext('2d');
+            projectionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [
+                        {
+                            label: 'Bitcoin Stack Value',
+                            data: values,
+                            borderColor: '#f7931a',
+                            backgroundColor: 'rgba(247, 147, 26, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Total Investment',
+                            data: investmentLine,
+                            borderColor: '#00d9ff',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff',
+                                font: {
+                                    family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 26, 26, 0.95)',
+                            titleColor: '#f7931a',
+                            bodyColor: '#ffffff',
+                            borderColor: '#f7931a',
+                            borderWidth: 1,
+                            titleFont: {
+                                family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
+                                size: 12
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += formatCurrency(context.parsed.y);
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#a0a0a0',
+                                font: {
+                                    family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif"
+                                },
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            },
+                            grid: {
+                                color: '#2a2a2a'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#a0a0a0',
+                                font: {
+                                    family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif"
+                                }
+                            },
+                            grid: {
+                                color: '#2a2a2a'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
