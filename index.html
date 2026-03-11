@@ -347,6 +347,52 @@
 
                     <button class="copy-btn" onclick="copyBtcAddress(event)">📋 Copy Bitcoin Address</button>
 
+                    <!-- Donation List Table -->
+                    <div style="margin-top: 40px;">
+                        <h3 style="color: var(--bitcoin-orange); margin-bottom: 20px; font-size: 18px;">Top Supporters</h3>
+                        <div class="donation-table-container">
+                            <table class="donation-table">
+                                <thead>
+                                    <tr>
+                                        <th onclick="sortDonationTable(0)" style="cursor: pointer;">
+                                            Name <span class="sort-indicator">⇅</span>
+                                        </th>
+                                        <th onclick="sortDonationTable(1)" style="cursor: pointer;">
+                                            Amount (BTC) <span class="sort-indicator">⇅</span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="donationTableBody">
+                                    <tr class="donation-row" onclick="highlightRow(this)">
+                                        <td><a href="#" target="_blank">Your Company #1</a></td>
+                                        <td>0.00005000 BTC</td>
+                                    </tr>
+                                    <tr class="donation-row" onclick="highlightRow(this)">
+                                        <td><a href="#" target="_blank">Your Company #2</a></td>
+                                        <td>0.00002500 BTC</td>
+                                    </tr>
+                                    <tr class="donation-row" onclick="highlightRow(this)">
+                                        <td><a href="#" target="_blank">Your Company #3</a></td>
+                                        <td>0.00001500 BTC</td>
+                                    </tr>
+                                    <tr class="donation-row" onclick="highlightRow(this)">
+                                        <td><a href="#" target="_blank">Your Company #4</a></td>
+                                        <td>0.00001000 BTC</td>
+                                    </tr>
+                                    <tr class="donation-row" onclick="highlightRow(this)">
+                                        <td><a href="#" target="_blank">Your Company #5</a></td>
+                                        <td>0.0000075 BTC</td>
+                                    </tr>                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="donation-note" style="margin-top: 30px; opacity: 0.7;">
+                        Would you like your name or company featured here as a supporter after a donation?
+                        <a href="mailto:plebsigma@proton.me" style="color: var(--bitcoin-orange); text-decoration: none; font-weight: 500;">Contact me</a> :)
+                    </div>
+
                     <div class="donation-note" style="margin-top: 30px; opacity: 0.7;">
                         All donations help maintain and improve this free tool. Thank you for your support! 🧡
                     </div>
@@ -768,6 +814,68 @@
                     }
                 }
             });
+        }
+
+        // Donation Table Functions
+        let donationSortState = { column: null, ascending: true };
+
+        function sortDonationTable(columnIndex) {
+            const tbody = document.getElementById('donationTableBody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            // Determine sort direction
+            if (donationSortState.column === columnIndex) {
+                donationSortState.ascending = !donationSortState.ascending;
+            } else {
+                donationSortState.column = columnIndex;
+                donationSortState.ascending = false; // Default to descending for amount
+            }
+
+            rows.sort((a, b) => {
+                let aValue = a.children[columnIndex].textContent.trim();
+                let bValue = b.children[columnIndex].textContent.trim();
+
+                // Parse numeric values for Amount column
+                if (columnIndex === 1) {
+                    aValue = parseFloat(aValue.replace(' BTC', ''));
+                    bValue = parseFloat(bValue.replace(' BTC', ''));
+                    return donationSortState.ascending ? aValue - bValue : bValue - aValue;
+                } else {
+                    // String comparison for Name column
+                    return donationSortState.ascending 
+                        ? aValue.localeCompare(bValue)
+                        : bValue.localeCompare(aValue);
+                }
+            });
+
+            // Re-append sorted rows
+            rows.forEach(row => tbody.appendChild(row));
+
+            // Update visual indicators
+            updateSortIndicators(columnIndex);
+        }
+
+        function updateSortIndicators(activeColumn) {
+            const headers = document.querySelectorAll('.donation-table th');
+            headers.forEach((header, index) => {
+                const indicator = header.querySelector('.sort-indicator');
+                if (index === activeColumn) {
+                    indicator.textContent = donationSortState.ascending ? '↑' : '↓';
+                    indicator.style.opacity = '1';
+                } else {
+                    indicator.textContent = '⇅';
+                    indicator.style.opacity = '0.5';
+                }
+            });
+        }
+
+        function highlightRow(row) {
+            // Remove highlight from all rows
+            document.querySelectorAll('.donation-row').forEach(r => {
+                r.classList.remove('highlighted');
+            });
+            // Add highlight to clicked row
+            row.classList.add('highlighted');
         }
     </script>
 </body>

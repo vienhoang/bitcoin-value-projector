@@ -574,13 +574,13 @@ section {
     line-height: 1.8;
 }
 
-.resource-card a, footer a {
+.resource-card a, .donation-table a, footer a {
     color: var(--cyan);
     text-decoration: none;
     font-weight: 600;
 }
 
-.resource-card a:hover, footer a:hover {
+.resource-card a:hover, .donation-table td a:hover, footer a:hover {
     text-decoration: underline;
 }
 
@@ -730,4 +730,91 @@ section {
     font-size: 14px;
     margin-top: 20px;
     line-height: 1.8;
+}
+
+/* Donation Table Styles */
+.donation-table-container {
+    overflow-x: auto;
+    background: var(--dark-panel);
+    border: 1px solid var(--dark-border);
+    border-radius: 8px;
+}
+
+.donation-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--dark-panel);
+}
+
+.donation-table thead {
+    background: linear-gradient(135deg, rgba(247, 147, 26, 0.15) 0%, rgba(0, 217, 255, 0.1) 100%);
+    border-bottom: 2px solid var(--bitcoin-orange);
+}
+
+.donation-table th {
+    padding: 16px 20px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--bitcoin-orange);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.donation-table th:hover {
+    background-color: rgba(247, 147, 26, 0.1);
+    color: #ffb347;
+}
+
+.sort-indicator {
+    margin-left: 6px;
+    opacity: 0.5;
+    font-size: 12px;
+    transition: opacity 0.3s ease;
+}
+
+.donation-table th:hover .sort-indicator {
+    opacity: 1;
+}
+
+.donation-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--dark-border);
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.donation-row {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.donation-row:hover {
+    background-color: rgba(247, 147, 26, 0.08);
+    border-left: 3px solid var(--bitcoin-orange);
+    padding-left: 17px;
+}
+
+.donation-row.highlighted {
+    background-color: rgba(247, 147, 26, 0.15);
+    border-left: 4px solid var(--bitcoin-orange);
+    padding-left: 16px;
+}
+
+.donation-row:last-child td {
+    border-bottom: none;
+}
+
+@media (max-width: 600px) {
+    .donation-table th,
+    .donation-table td {
+        padding: 12px 15px;
+        font-size: 13px;
+    }
+    
+    .donation-table th {
+        font-size: 12px;
+    }
 }
