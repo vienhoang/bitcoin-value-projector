@@ -4,6 +4,10 @@ A free, privacy-first bitcoin investment calculator and HODL simulator. Project 
 
 **Live:** [bitcoin-value-projector.pages.dev](https://bitcoin-value-projector.pages.dev)
 
+<p align="center">
+  <img src="demo.gif" width="800">
+</p>
+
 ## 🚀 Features
 
 - **Bitcoin Stack Calculator** - Track your current holdings and their value in real-time.
@@ -14,6 +18,7 @@ A free, privacy-first bitcoin investment calculator and HODL simulator. Project 
 - **Interactive Visualization** - Beautiful charts showing projected vs. actual investment growth.
 - **Timeline View** - Year-by-year breakdown of portfolio value and multiples.
 - **ROI Tracking** - Monitor your current profit/loss and return on investment.
+- **Top Supporters** - Honor roll of bitcoin donors with sortable Name and Amount columns.
 - **100% Private** - All calculations run locally, no data is sent to any server.
 
 ## 📊 Use Cases
