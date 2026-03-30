@@ -582,8 +582,13 @@
             const targetYear = parseInt(document.getElementById('targetYear').value);
             const dcaMonthly = parseFloat(document.getElementById('dcaMonthly').value) || 0;
 
-            if (btcAmount <= 0 || currentPrice <= 0) {
-                alert('Please fill in valid values ​​for bitcoin quantity and current price.');
+            if (currentPrice <= 0) {
+                alert('Please enter a valid current Bitcoin price.');
+                return;
+            }
+
+            if (btcAmount === 0 && dcaMonthly <= 0) {
+                alert('Bitcoin amount is 0 — please enter a monthly DCA amount before calculating.');
                 return;
             }
 
